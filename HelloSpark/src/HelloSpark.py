@@ -1,4 +1,4 @@
-from pyspark.sql import *
+from pyspark.sql import SparkSession
 from lib.logger import Log4j
 from lib.config_utils import SparkConfig
 import sys
@@ -18,10 +18,11 @@ if __name__ == '__main__':
     spark = SparkSession.builder.config(conf=conf).getOrCreate()
 
     logger = Log4j(spark)
-
     logger.info("Starting spark project")
 
     dataframe = SparkConfig.load_data(spark,sys.argv[1])
-    dataframe.show()
-    logger.info(f"Config: {conf.get("spark.test.name")}")
+    repartition_df = dataframe.repartition(2)
+    count_df = SparkConfig.get_country_count_above_age_40(repartition_df)
+    logger.info(count_df.collect())
     logger.info("Finished spark project")
+    #input("Press Enter to Complete")
